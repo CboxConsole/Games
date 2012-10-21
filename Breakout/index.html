@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+	<head>
+  <title>Breakout - Cocos2D.js</title>
+  <style type="text/css">
+  	body {
+  		margin: 0;
+  		padding: 0;
+  		background-color: black;
+  	}
+
+  	#surface {
+  		position:absolute;
+			left: 50%;
+		  top: 50%;
+		  width:800px;
+  		height:352px;
+		  margin-left:-400px;
+		  margin-top:-176px;
+  	}
+  </style>
+  <script type="text/javascript" src="cocos2d.js"></script>
+  <script type="text/javascript" src="util.js"></script>
+  <script type="text/javascript" src="breakout.js"></script>
+  <script type="text/javascript">
+  function breakoutCallback(e, param) {
+  	if (e == 'outof')
+  		breakout.restart();
+  }
+
+	function run() {
+		var opt = {
+			view: document.getElementById('surface'),
+			fps: true,
+			callback: breakoutCallback
+		};
+		
+		window.breakout = new Breakout(opt);
+		breakout.start();
+	}
+	</script>
+	</head>
+	<body onload="run()">
+		<div id="surface" style="width: 800px; height: 352px;"></div>
+	</body>
+</html>
