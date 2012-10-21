@@ -5,12 +5,7 @@
  */
  
 (function() {
-
-	var sprites = {
-		url: 'assets/sprites.png',
-		rect: new cc.Rect(0, 0, 64, 16)
-	};
-
+	
 	function CreateSprite(x, y, w, h) {
 		return new cc.Sprite({
 			url: 'assets/sprites.png',
