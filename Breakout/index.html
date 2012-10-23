@@ -26,6 +26,8 @@
   function breakoutCallback(e, param) {
   	if (e == 'outof')
   		breakout.restart();
+  	else if (e == 'hitblock')
+  		console.log('hitblock', param);
   }
 
 	function run() {

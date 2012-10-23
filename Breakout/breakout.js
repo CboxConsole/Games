@@ -36,18 +36,23 @@
 
 		this.velocity = new cc.Point(60, 120);
 		this.scheduleUpdate();
+
+		// callback for events
+		this.callback
 	}
 
 	Ball.inherit(cc.Node, {
     velocity: null,
+    accelerate:1.5,
     update: function (dt) {
 	    var pos = util.copy(this.position),
-	        vel = util.copy(this.velocity)
+	        vel = util.copy(this.velocity),
+	        acc = util.copy(this.accelerate);
 
 	    // Test X position
 	    if (!this.testBlockCollision('x', dt * vel.x)) {
 	        // Adjust X position
-	        pos.x += dt * vel.x
+	        pos.x += dt * (vel.x * acc);
 	        this.position = pos
 	    }
 
@@ -55,7 +60,7 @@
 	    // Test Y position
 	    if (!this.testBlockCollision('y', -dt * vel.y)) {
 	        // Adjust Y position
-	        pos.y -= dt * vel.y
+	        pos.y -= dt * (vel.y * acc);
 	        this.position = pos
 	    }
 
@@ -147,13 +152,13 @@
               tilePos = new cc.Point(tileX, tileY)
 
           // Tile ID 0 is an empty tile, everything else is a hit
-          if (mapLayer.tileGID(tilePos) > 0) {
-              hitBlocks.push(tilePos)
-          }
+          if (mapLayer.tileGID(tilePos) > 0)
+            hitBlocks.push(tilePos);
       }
 
       // If we hit something, swap directions
       if (hitBlocks.length > 0) {
+      	console.log(hitBlocks.length);
           vel[axis] *= -1
       }
 
@@ -161,7 +166,8 @@
 
       // Remove the blocks we hit
       for (var i=0; i<hitBlocks.length; i++) {
-          mapLayer.removeTile(hitBlocks[i])
+				this.parent.trigger('hitblock', {x:hitBlocks[i].x, y:hitBlocks[i].y});
+				mapLayer.removeTile(hitBlocks[i])
       }
 
       return (hitBlocks.length > 0)
@@ -243,8 +249,8 @@
 		  batPos.x = evt.locationInCanvas.x
 		  bat.position = batPos
 		},
-		trigger: function(evt) {
-			this.callback(evt);
+		trigger: function(e, param) {
+			this.callback(e, param);
 		}
 	});
 	
