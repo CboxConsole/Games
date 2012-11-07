@@ -7,25 +7,41 @@
   		margin: 0;
   		padding: 0;
   		background-color: black;
+  		overflow: hidden;
+		  width:1024px;
+  		height:768px;
   	}
 
-  	#surface {
+  	#screen {
   		position:absolute;
-			left: 50%;
+  		left:50%;
 		  top: 50%;
-		  width:800px;
-  		height:352px;
-		  margin-left:-400px;
-		  margin-top:-176px;
+		  width:480px;
+  		height:480px;
+		  margin-left:-240px;
+		  margin-top:-240px;
+		  background-color: white;
+		  overflow: hidden;
+		  border: 2px solid white;
   	}
   </style>
   <script type="text/javascript" src="cocos2d.js"></script>
   <script type="text/javascript" src="util.js"></script>
+  <script type="text/javascript" src="assets.js"></script>
   <script type="text/javascript" src="breakout.js"></script>
   <script type="text/javascript">
   function breakoutCallback(e, param) {
-  	if (e == 'outof')
-  		breakout.restart();
+  	if (e == 'outof') {
+  		console.log('outof');
+  		// breakout.stop();
+
+  		setTimeout(function() {
+  			console.log('resume');
+				// breakout.restart();  			
+  		}, 1000);
+  		// breakout.restart();
+  		breakout.setpos();
+  	}
   	else if (e == 'hitblock')
   		console.log('hitblock', param);
   }
@@ -34,7 +50,7 @@
 		var opt = {
 			view: document.getElementById('surface'),
 			fps: true,
-			callback: breakoutCallback
+			callback: breakoutCallback,
 		};
 		
 		window.breakout = new Breakout(opt);
@@ -43,6 +59,12 @@
 	</script>
 	</head>
 	<body onload="run()">
-		<div id="surface" style="width: 800px; height: 352px;"></div>
+		<div id="screen">
+			<!-- <div id="status" style="width: 800px; height: 80px; background-color:white">
+				<div id="score">Score: 0</div>
+				<div id="accelerate">Accelerate: 1</div>
+			</div> -->
+			<div id="surface" style="width: 480px; height: 480px;"></div>
+		</div>
 	</body>
 </html>

@@ -1,19 +1,30 @@
 /*
-	breakout with cocos2d standalone version.
-	it's based breakoout node.js version.
-	original source at https://github.com/ryanwilliams/cocos2d-breakout
- */
- 
-(function() {
+	WARNING
+	THIS SOFTWARE PURPOSE IS TO DEMO COCOS2D WITH CBOX(Chrome Box) 
+	AT GOOGLE HACKFAIR KOREA '12.
+
+	THIS SOURCE CODE BASED BREAKOUT NODE.JS VERSION EXAMPLE.[1] WE WERE PORTING 
+	DEMO CODE BY USING COCOS2D STANDARD-ALONE VERSION AND HAD MODIFICATION 
+	TO OUR DEMO. SO ALL RIGHT RESERVED @ryanwilliams, OWNER OF ORIGINAL 
+	SOURCE AND DEMO SOURCE CODE.
+
+	[1]: https://github.com/ryanwilliams/cocos2d-breakout
+*/
 	
+(function(window, undefined) {
+	var assets = window.Assets();
+
+	// SPRITE APIs	
 	function CreateSprite(x, y, w, h) {
 		return new cc.Sprite({
-			url: 'assets/sprites.png',
+			url: assets.sprite,
 			rect: new cc.Rect(x, y, w, h)	
 		});
 	}
 
-	// Bat object
+	//
+	// BAT
+	//
 	function Bat () {
 		Bat.superclass.constructor.call(this);
 	  var sprite = CreateSprite(0, 0, 64, 16);
@@ -24,8 +35,9 @@
 
 	Bat.inherit(cc.Node);
 
-	// Ball object
-
+	//
+	// BALL
+	//
 	function Ball () {
 		Ball.superclass.constructor.call(this)
 
@@ -36,9 +48,6 @@
 
 		this.velocity = new cc.Point(60, 120);
 		this.scheduleUpdate();
-
-		// callback for events
-		this.callback
 	}
 
 	Ball.inherit(cc.Node, {
@@ -157,10 +166,7 @@
       }
 
       // If we hit something, swap directions
-      if (hitBlocks.length > 0) {
-      	console.log(hitBlocks.length);
-          vel[axis] *= -1
-      }
+      if (hitBlocks.length > 0) {vel[axis] *= -1;}
 
       this.velocity = vel
 
@@ -174,115 +180,107 @@
     }
 	});
 
+	//
+	// BREAKOUT
+	//
 	function Breakout (cb) {
-
-		this.callback = cb;
-
 	  // You must always call the super class version of init
 	  Breakout.superclass.constructor.call(this)
 
-	  var director = cc.Director.sharedDirector
-	  
+	  // Put callback
+	  this.callback = cb;
 
+	  // Enabled keyboard control
 	  this.isKeyboardEnabled = true;
 
 	  // Get size of canvas
-	  var s = cc.Director.sharedDirector.winSize
+	  var s = cc.Director.sharedDirector.winSize;
 
-		// Add Map
-	  var map = new cc.TMXTiledMap({url: 'assets/google.tmx'})
-
+	  // Add Map
+		this.map = new cc.TMXTiledMap({url: assets.map});
+		this.bat = new Bat();
+		this.ball = new Ball();
+		
+	  // If games is running by standalone, We have to give a few minutes 
+	  // for while to build the map. 
 	  var self = this;
 	  setTimeout(function() {
-		  map.position = new cc.Point(0, s.height - map.contentSize.height)
-		  self.addChild(map)
-		  self.map = map
+		  self.map.position = new cc.Point(0, s.height - self.map.contentSize.height);
+		  self.setpos();
 
-		  // Add Bat
-		  var bat = new Bat()
-		  // bat.position = new cc.Point(160, s.height - 280)
-		  bat.position = new cc.Point(160, s.height - 320)
-		  self.addChild(bat)
-		  self.bat = bat
+		  self.addChild(self.map);
+		  self.addChild(self.bat);
+		  self.addChild(self.ball);
 
-		  // Add Ball
-		  var ball = new Ball()
-		  ball.position = new cc.Point(140, s.height - 240)
-		  // ball.position = new cc.Point(140, s.height - 210)
-		  self.addChild(ball)
-		  self.ball = ball;
+		  delete self;
 	  }, 100);
 	}
 
 	Breakout.inherit(cc.Layer, {
-		bat: null,
-		ball: null,
-		offset:5,
-		keyRepeat: function(evt) {
-			var bat = this.bat
-				,	offset = this.offset
-				, batPos = bat.position
-		  
-		  if (evt.which == 39)
-		  	batPos.x += offset;
-		  else
-		  	batPos.x -= offset;
-		  bat.position = batPos
+		offset:12,
+		movebat: function(e) {
+			var offset = e.which == 39 ? this.offset : -(this.offset)
+				,	pos = util.copy(this.bat.position);
+			pos.x += offset;
+		  this.bat.position = pos;
 		},
-
-		keyDown: function(evt) {
-			var bat = this.bat,
-			offset = this.offset
-
-		  var batPos = bat.position
-		  if (evt.which == 39)
-		  	batPos.x += offset;
-		  else
-		  	batPos.x -= offset;
-		  bat.position = batPos
+		keyRepeat: function(e) {
+			this.movebat(e);
 		},
-
-		mouseMoved: function (evt) {
-		  var bat = this.bat
-
-		  var batPos = bat.position
-		  batPos.x = evt.locationInCanvas.x
-		  bat.position = batPos
+		keyDown: function(e) {
+		  this.movebat(e);
 		},
 		trigger: function(e, param) {
 			this.callback(e, param);
+		},
+		setpos: function() {
+			var s = cc.Director.sharedDirector.winSize;
+			this.ball.position = new cc.Point(assets.pos.ball.x * 32, s.height - assets.pos.ball.y * 16);
+			this.bat.position = new cc.Point(assets.pos.bat.x * 32, s.height - assets.pos.bat.y * 16);
 		}
 	});
-	
+
+	//
+	// EXPORTS BREAKOUT
+	//
 	window.Breakout = function(opt) {
 		this.opt = opt;
+		this.breakout = undefined;
 
 		this.start = function() {
 			var director = cc.Director.sharedDirector;
 			director.attachInView(opt.view)
 			director.displayFPS = opt.fps;
 			
-			// Create a scene and layer
-			var scene = new cc.Scene()
-			, layer = new Breakout(opt.callback)
+			this.breakout = new Breakout(opt.callback)
+			
+			// Create a scene, Add our layer to the scene
+			var scene = new cc.Scene();
+			scene.addChild(this.breakout);
 
-			// Add our layer to the scene
-			scene.addChild(layer)
-
+			// run with scene
 			director.runWithScene(scene)
 		}
 
 		this.restart = function () {
-		  var director = cc.Director.sharedDirector
+			if (this.breakout) delete this.breakout;
+ 			this.breakout = new Breakout(opt.callback);
 
-		  // Create a scene
+		  // Create a scene, Add our layer to the scene
 		  var scene = new cc.Scene()
+		  scene.addChild(this.breakout);
 
-		  // Add our layer to the scene
-		  scene.addChild(new Breakout(opt.callback))
-
-		  director.replaceScene(scene)
+		  // replace scene
+		  cc.Director.sharedDirector.replaceScene(scene)
 		}
+
+		this.setpos = function() {
+			this.breakout.setpos();
+		};
+
+		this.stop = function() {
+			cc.Director.sharedDirector.stopAnimation();
+		};
 	}
 
-})()
+})(window)
