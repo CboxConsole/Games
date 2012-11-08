@@ -14,6 +14,33 @@
 (function(window, undefined) {
 	var assets = window.Assets();
 
+	//
+	// SOUND EFFECT
+	//
+	var Sound = {
+		hitblock: [],
+		hitbar: [],
+		load: function() {
+			for (var i = 0; i < 20; ++i)
+				Sound.hitblock.push(new Audio(assets.sound.hitblock));
+			Sound.hitblock.index = 0;
+
+			for (var i = 0; i < 10; ++i)
+				Sound.hitbar.push(new Audio(assets.sound.hitbar));
+			Sound.hitbar.index = 0;
+		},
+		playHitBlock: function() {
+			if (Sound.hitblock.index >= Sound.hitblock.length)
+				Sound.hitblock.index = 0
+			Sound.hitblock[Sound.hitblock.index++].play();
+		},
+		playHitBar: function() {
+			if (Sound.hitbar.index >= Sound.hitbar.length)
+				Sound.hitbar.index = 0
+			Sound.hitbar[Sound.hitbar.index++].play();
+		}
+	}
+
 	// SPRITE APIs	
 	function CreateSprite(x, y, w, h) {
 		return new cc.Sprite({
@@ -48,11 +75,13 @@
 
 		this.velocity = new cc.Point(60, 120);
 		this.scheduleUpdate();
+
+		this.hitblockCount = 0;
 	}
 
 	Ball.inherit(cc.Node, {
     velocity: null,
-    accelerate:1.5,
+    accelerate:2,
     update: function (dt) {
 	    var pos = util.copy(this.position),
 	        vel = util.copy(this.velocity),
@@ -87,8 +116,10 @@
       // If moving down then check for collision with the bat
       if (vel.y > 0) {
           if (cc.rectOverlapsRect(ballBox, batBox)) {
-              // Flip Y velocity
-              vel.y *= -1
+              vel.y *= -1; // Flip Y velocity
+
+              Sound.playHitBar();
+              this.parent.trigger('hitbat');
           }
       }
 
@@ -122,9 +153,7 @@
 
 		  // Moving down and hit bottom edge - DEATH
 		  if (vel.y > 0 && cc.rectGetMaxY(ballBox) < 0) {
-		      // Restart game
-		      // this.parent.restart()
-		      this.parent.trigger('outof');
+		      this.parent.trigger('outofbound');
 		  }
 
 		  this.velocity = vel
@@ -173,8 +202,14 @@
       // Remove the blocks we hit
       for (var i=0; i<hitBlocks.length; i++) {
 				this.parent.trigger('hitblock', {x:hitBlocks[i].x, y:hitBlocks[i].y});
-				mapLayer.removeTile(hitBlocks[i])
+				mapLayer.removeTile(hitBlocks[i]);
+
+				Sound.playHitBlock();
+				this.hitblockCount++;
       }
+
+      if (hitBlocks.length > 0 && this.hitblockCount == assets.maxblock)
+      	this.parent.trigger('breakout');
 
       return (hitBlocks.length > 0)
     }
@@ -201,6 +236,9 @@
 		this.bat = new Bat();
 		this.ball = new Ball();
 		
+		// Sound load
+		Sound.load();
+
 	  // If games is running by standalone, We have to give a few minutes 
 	  // for while to build the map. 
 	  var self = this;
@@ -215,6 +253,7 @@
 		  delete self;
 	  }, 100);
 	}
+	
 
 	Breakout.inherit(cc.Layer, {
 		offset:12,
@@ -259,7 +298,8 @@
 			scene.addChild(this.breakout);
 
 			// run with scene
-			director.runWithScene(scene)
+			director.runWithScene(scene);
+			director.startAnimation();
 		}
 
 		this.restart = function () {
@@ -272,6 +312,7 @@
 
 		  // replace scene
 		  cc.Director.sharedDirector.replaceScene(scene)
+		  cc.Director.sharedDirector.startAnimation();
 		}
 
 		this.setpos = function() {
