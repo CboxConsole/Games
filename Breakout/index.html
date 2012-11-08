@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-  <title>Breakout - Cocos2D.js</title>
+  <title>Breakout</title>
   <style type="text/css">
   	body {
   		margin: 0;
@@ -17,12 +17,39 @@
   		left:50%;
 		  top: 50%;
 		  width:480px;
-  		height:480px;
+  		height:530px;
 		  margin-left:-240px;
-		  margin-top:-240px;
+		  margin-top:-275px;
 		  background-color: white;
 		  overflow: hidden;
 		  border: 2px solid white;
+  	}
+
+  	#status {
+  		width:480px;
+  		height:50px;
+  		background-color: black;
+  		border-bottom: solid 2px white;
+  	}
+
+  	#status div {
+  		color:white;
+  		font-size:2.5em;
+  		font-weight: 1200;
+  	}
+
+  	#status div:first-child {
+  		float:left;
+  		padding-left: 0.1em;
+  	}
+  	#status div:last-child {
+  		float:right;
+  		padding-right: 0.1em;
+  	}
+
+  	#surface {
+  		width: 480px; 
+  		height: 480px;
   	}
   </style>
   <script type="text/javascript" src="cocos2d.js"></script>
@@ -30,41 +57,67 @@
   <script type="text/javascript" src="assets.js"></script>
   <script type="text/javascript" src="breakout.js"></script>
   <script type="text/javascript">
-  function breakoutCallback(e, param) {
-  	if (e == 'outof') {
-  		console.log('outof');
-  		// breakout.stop();
+  var game = {
+  	score:0,
+  	point:10,
+  	scoreWeight:0.0,
+  	timeLimit: 1000 * 3,
+  	time:0,
+  	event: function(e, param) {
+  		game[e].apply(game, arguments);
+  	},
+  	breakout: function() {
+  		game.breakout.stop();
+  	},
+  	hitbat: function() {
+  		game.scoreWeight = 0.0;
+  	},
+  	timeover: function() {
+  		game.breakout.stop();
+  	},
+  	hitblock: function() {
+  		game.score += game.point * game.scoreWeight;
+  		game.scoreWeight += 0.2;
 
-  		setTimeout(function() {
-  			console.log('resume');
-				// breakout.restart();  			
-  		}, 1000);
-  		// breakout.restart();
-  		breakout.setpos();
-  	}
-  	else if (e == 'hitblock')
-  		console.log('hitblock', param);
+  		document.getElementById('score').innerHTML = game.score;	
+  	},
+  	outofbound: function() {
+  		game.breakout.setpos();
+  	},
+  	stop: function() {
+  		game.breakout.stop();
+  	},
+  	start: function() {
+  		var opt = {
+				view: document.getElementById('surface'),
+				fps: true,
+				callback: game.event,
+			};
+			
+			game.breakout = new Breakout(opt);
+			game.breakout.start();
+
+			setTimeout(game.timer, 1000);
+  	},
+  	timer: function() {
+  		game.time += 1000;
+  		var remain = game.timeLimit - game.time
+				,	date = new Date(remain)
+				, sec = (date.getSeconds() < 10) ? '0' + date.getSeconds() : date.getSeconds()
+
+			document.getElementById('time').innerHTML = date.getMinutes() + ':' + sec;
+			(remain > 0) ? setTimeout(game.timer, 1000) : game.event('timeover');
+		}
   }
-
-	function run() {
-		var opt = {
-			view: document.getElementById('surface'),
-			fps: true,
-			callback: breakoutCallback,
-		};
-		
-		window.breakout = new Breakout(opt);
-		breakout.start();
-	}
 	</script>
 	</head>
-	<body onload="run()">
+	<body onload="game.start()"
 		<div id="screen">
-			<!-- <div id="status" style="width: 800px; height: 80px; background-color:white">
-				<div id="score">Score: 0</div>
-				<div id="accelerate">Accelerate: 1</div>
-			</div> -->
-			<div id="surface" style="width: 480px; height: 480px;"></div>
+			<div id="status">
+				<div id="time">3:00</div>
+				<div id="score">0</div>
+			</div>
+			<div id="surface"></div>
 		</div>
 	</body>
 </html>
