@@ -25,10 +25,6 @@ app.configure(function () {
     app.use('/', express.static(__dirname + '/'));
 });
 
-// app.get('/breakout', function(req, res) {
-// 	res.redirect('/Breakout');
-// })
-
 app.listen(process.env.PORT, null);
 
 console.log('STARTED SERVER WITH PORT ' + process.env.PORT);
