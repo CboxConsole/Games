@@ -467,7 +467,7 @@ function GameContoller() {
 		start: function() {
 			var director = cc.Director.sharedDirector;
 			director.attachInView(document.getElementById('surface'));
-			director.displayFPS = true;
+			director.displayFPS = false;
 
 			game.breakout = new Breakout(game.event);
 
