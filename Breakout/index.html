@@ -8,21 +8,21 @@
   		padding: 0;
   		background-color: black;
   		overflow: hidden;
-		  width:1024px;
+        width:1024px;
   		height:768px;
   	}
 
   	#screen {
-  		position:absolute;
-  		left:50%;
-		  top: 50%;
-		  width:480px;
-  		height:530px;
-		  margin-left:-240px;
-		  margin-top:-275px;
-		  background-color: white;
-		  overflow: hidden;
-		  border: 2px solid white;
+        position:absolute;
+        left:50%;
+        top: 50%;
+        width:480px;
+        height:530px;
+        margin-left:-240px;
+        margin-top:-275px;
+        background-color: black;
+        overflow: hidden;
+        border: 2px solid white;
   	}
 
   	#status {
@@ -48,7 +48,7 @@
   	}
 
   	#surface {
-  		width: 480px; 
+  		width: 480px;
   		height: 480px;
   	}
   </style>
@@ -57,7 +57,7 @@
 
 <script id="cboxscript" type="text/x-javascript">
 function GameContoller() {
-	
+
 	/////////////////////////////////////////////////////////////////////////////
 	// UTILS AND RESOURCES
 	/////////////////////////////////////////////////////////////////////////////
@@ -95,12 +95,12 @@ function GameContoller() {
 	    return copy;
 		}
 	};
-	
+
 	// SPRITE CREATOR
 	function createSprite(x, y, w, h) {
 		return new cc.Sprite({
 			url: assets.sprite,
-			rect: new cc.Rect(x, y, w, h)	
+			rect: new cc.Rect(x, y, w, h)
 		});
 	}
 
@@ -129,7 +129,7 @@ function GameContoller() {
 					hitbar:'assets/hitbar.mp3',
 					hitblock:'assets/hitblock.mp3'
 				}
-			}	
+			}
 		};
 		return this.assets[this.type];
 	}
@@ -164,7 +164,7 @@ function GameContoller() {
 	/////////////////////////////////////////////////////////////////////////////
 	// GAME OBJECT
 	/////////////////////////////////////////////////////////////////////////////
-	
+
 	// BAT OBJECT
 	function Bat() {
 		Bat.superclass.constructor.call(this);
@@ -309,8 +309,8 @@ function GameContoller() {
 	        	hitBlocks.forEach(function(b, i) {
 	        		if (b.x == tilePos.x && b.y == tilePos.y) found = true;
 	        	})
-	        	
-	          found || hitBlocks.push(tilePos);            	
+
+	          found || hitBlocks.push(tilePos);
 	        }
 	    }
 
@@ -334,7 +334,7 @@ function GameContoller() {
 	    return (hitBlocks.length > 0)
 	  }
 	});
-	
+
 	// BREAKOUT
 	function Breakout(cb, keyboard) {
 	  // You must always call the super class version of init
@@ -353,12 +353,12 @@ function GameContoller() {
 		this.map = new cc.TMXTiledMap({url: assets.map});
 		this.bat = new Bat();
 		this.ball = new Ball();
-		
+
 		// Sound load
 		Sound.load();
 
-	  // If games is running by standalone, We have to give a few minutes 
-	  // for while to build the map. 
+	  // If games is running by standalone, We have to give a few minutes
+	  // for while to build the map.
 	  var self = this;
 	  setTimeout(function() {
 		  self.map.position = new cc.Point(0, s.height - self.map.contentSize.height);
@@ -408,8 +408,8 @@ function GameContoller() {
 		prevScore:0,
 		point:10,
 		scoreWeight:0.0,
-		// timeLimit: 1000 * 60 * 3,
-		timeLimit: 1000 * 3,
+		timeLimit: 1000 * 60 * 3,
+		// timeLimit: 1000 * 3,
 		time:0,
 		userName:'도전자',
 		gameTimer: undefined,
@@ -446,10 +446,10 @@ function GameContoller() {
 			ranking.trigger('breakout', 'end', {user_name:game.userName, score:game.score}, game.response);
 
 			cc.Director.sharedDirector.stopAnimation();
-			
+
 
 			// alert('축하합니다. ' + game.userName + ' 점수는 ' + game.score);
-			
+
 			// back to homescreen
 		},
 		restart: function() {
@@ -464,30 +464,31 @@ function GameContoller() {
 		  cc.Director.sharedDirector.replaceScene(scene)
 		  cc.Director.sharedDirector.startAnimation();
 		},
-		start: function() {			
+		start: function() {
 			var director = cc.Director.sharedDirector;
 			director.attachInView(document.getElementById('surface'));
 			director.displayFPS = true;
-			
+
 			game.breakout = new Breakout(game.event);
-			
+
 			var scene = new cc.Scene();
 			scene.addChild(game.breakout);
 
-			// run with scene
-			director.runWithScene(scene);
-			director.startAnimation();
-
+            // cocos2d need a few min for loading
 			setTimeout(function() {
+                // run with scene
+                director.runWithScene(scene);
+                director.startAnimation();
 				game.gameTimer = setTimeout(game.timer, 1000);
 
 				game.userName = game.userName + new Date().getSeconds();
 				ranking.trigger('breakout', 'start', {user_name:game.userName, score:0}, game.response);
-			}, 1000);
-			game.started = true;
+                game.started = true;
+			}, 1500);
 		},
 		timer: function() {
 			game.time += 1000;
+
 			var remain = game.timeLimit - game.time
 				,	date = new Date(remain)
 				, sec = (date.getSeconds() < 10) ? '0' + date.getSeconds() : date.getSeconds()
@@ -530,7 +531,8 @@ var cboxgame = {
 			<div id="time">3:00</div>
 			<div id="score">0</div>
 		</div>
-		<div id="surface"></div>
+		<div id="surface">
+        </div>
 	</div>
 </body>
 </html>
