@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Xbox Contorller</title>
+    <script id="cboxscript" type="text/x-javascript">
+        var cboxgame = {
+            fireEvent : function(data){
+                if( data.btnX == 1 ){
+                    testCall();
+                }
+            }
+        };
+
+        function createNaClModule(tool, width, height) {
+            var moduleEl = document.createElement('embed');
+            moduleEl.setAttribute('name', 'nacl_module');
+            moduleEl.setAttribute('id', 'nacl_module');
+            moduleEl.setAttribute('width', width);
+            moduleEl.setAttribute('height',height);
+            moduleEl.setAttribute('src', 'nacl/gamepad.nmf');
+            moduleEl.setAttribute('type', 'application/x-nacl');
+            if (tool == 'win' || tool == 'linux' || tool == 'mac') {
+                mimetype = 'application/x-ppapi-newlib';
+                moduleEl.setAttribute('type', mimetype);
+            }
+
+            // The <EMBED> element is wrapped inside a <DIV>, which has both a 'load'
+            // and a 'message' event listener attached.  This wrapping method is used
+            // instead of attaching the event listeners directly to the <EMBED> element
+            // to ensure that the listeners are active before the NaCl module 'load'
+            // event fires.
+            var listenerDiv = document.getElementById('listener');
+            console.debug(moduleEl);
+            listenerDiv.appendChild(moduleEl);
+        }
+
+        createNaClModule("", "200px", "200px");
+
+
+        collie.ImageManager.addImages({
+            "xbox" : "./img/xbox.png"
+        }, function () {
+            var layer = new collie.Layer({
+                width : 1024,
+                height : 768
+            });
+
+            var oXbox = new collie.DisplayObject({
+                x : 512,
+                y : 150,
+                width : 530,
+                height : 360,
+                backgroundImage : "xbox"
+            }).addTo(layer);
+
+
+            collie.Renderer.addLayer(layer);
+            collie.Renderer.load(document.getElementById("container"));
+            collie.Renderer.start(1000 / 30);
+        });
+
+
+    </script>
+</head>
+<body style="width:100%;height:100%;background-color:#FFFFFF">
+<div id="container" class="container"></div>
+<div id="listener" style="position: absolute;margin: -550px 0 0 300px;"></div>
+</body>
+</html>
