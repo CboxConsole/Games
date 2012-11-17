@@ -182,23 +182,6 @@ var resetGame = function(){};
             nScale += 0.1;
         }
 
-
-        var oChrome = new collie.DisplayObject({
-            x : 370,
-            y : 200,
-            scaleX : 0.3,
-            scaleY : 0.3,
-            backgroundImage : "chrome"
-        }).addTo(oLayer);
-
-        var oApple = new collie.DisplayObject({
-            x : 150,
-            y : 0,
-            scaleX : 0.1,
-            scaleY : 0.1,
-            backgroundImage : "apple"
-        }).addTo(oLayer);
-
         var oHole1 = new collie.DisplayObject({
             x : 400,
             y : 260,
@@ -216,6 +199,21 @@ var resetGame = function(){};
         var oHole3 = new collie.DisplayObject({
             x : 300,
             y : 300,
+            scaleX : 0.3,
+            scaleY : 0.3,
+            backgroundImage : "hole"
+        }).addTo(oLayer);
+        var oHole4 = new collie.DisplayObject({
+            x : 400,
+            y : 250,
+            scaleX : 0.3,
+            scaleY : 0.3,
+            backgroundImage : "hole"
+        }).addTo(oLayer);
+
+        var oHole5 = new collie.DisplayObject({
+            x : 330,
+            y : 250,
             scaleX : 0.3,
             scaleY : 0.3,
             backgroundImage : "hole"
@@ -304,66 +302,49 @@ var resetGame = function(){};
         var nMoveY = 5;
         nAppleNumber = 5;
         nChromeNumber = -3;
+        var checkSafe = function(obj,nDebug){
+            if( obj.get("x") < (nPx) && nPx < obj.get("x")+130 && nPy - obj.get("y") < -50 && nPy - obj.get("y") > -60 ){
+                //console.log(nDebug,bSafe,  obj.get("x"), nPx, nPy-obj.get("y"));
+
+                    if( !bSafe ){
+                        //bSafe = true;
+                    }else{
+                        bSafe = false;
+                    }
+
+            }
+        }
         collie.Renderer.start(1000 / 30,function(){
+
 
             if (oTimerJump === null){
                 nPx = oP1.get("x");
                 nPy = oP1.get("y");
-                if(nPy - oHole1.get("y") < -50){
-                    if( oHole1.get("x") < nPx && nPx < oHole1.get("x") + 100 ){
-                        console.log("1", oHole1.get("x"), nPx);
-                        if( !bSafe ){
-                            setTimeout(function(){
-                                bSafe = true;
-                            },1000);
-                        }else{
-                            bSafe = false;
-                        }
-                    }
-                }
-                if(nPy - oHole2.get("y") < -50){
-                    if( oHole2.get("x") < nPx && nPx < oHole2.get("x") + 100 ){
-                        console.log("2", oHole2.get("x"), nPx);
-                        if( !bSafe ){
-                            setTimeout(function(){
-                                bSafe = true;
-                            },1000);
-                        }else{
-                            bSafe = false;
-                        }
-                    }
-                }
-                if(nPy - oHole3.get("y") < -50){
-                    if( oHole3.get("x") < nPx && nPx < oHole3.get("x") + 100 ){
-                        console.log("3", oHole3.get("x"), nPx);
-                        if( !bSafe ){
-                            setTimeout(function(){
-                                bSafe = true;
-                            },1000);
-                        }else{
-                            bSafe = false;
-                        }
+                checkSafe(oHole1, 1);
+                checkSafe(oHole2, 2);
+                checkSafe(oHole3,3);
+                checkSafe(oHole4,4);
+                checkSafe(oHole5,5);
+            }else{
+                bSafe = true;
+            }
 
-                    }
-                }
-//                if(nPy - oApple.get("y") < -50){
-//                    oApple.set("visible", false);
-//                    setTimeout(function(){
-//                        bSafe = true;
-//                    },500);
-//                    bSafe = false;
-//                }
-//                if(nPy - oChrome.get("y") < -50){
-//                    oChrome.set("visible", false);
-//                }
+            if( nPx > 650 ) {
+                oP1.set("x", 650);
+                oP2.set("x", 650);
+            }
+            if( nPx < 150 ) {
+                oP1.set("x", 150);
+                oP2.set("x", 150);
             }
 
             if( !bSafe ) return;
             if( oHole1.get("y") < 550 ){
+                _nScale = oHole1.get("scaleX")+0.02;
                 oHole1.set("y", oHole1.get("y")+nMoveY);
                 oHole1.set("x", oHole1.get("x")+2);
-                oHole1.set("scaleX", oHole1.get("scaleX")+0.03);
-                oHole1.set("scaleY", oHole1.get("scaleY")+0.03);
+                oHole1.set("scaleX", (_nScale>1)?1:_nScale);
+                oHole1.set("scaleY", (_nScale>1)?1:_nScale);
             }else{
                 oHole1.set("x", 400);
                 oHole1.set("y", 260);
@@ -371,11 +352,12 @@ var resetGame = function(){};
                 oHole1.set("scaleY", 0.3);
             }
 
-            if( oHole2.get("y") < 550 ){
+            if( oHole2.get("y") < 660 ){
+                _nScale = oHole2.get("scaleX")+0.02;
                 oHole2.set("y", oHole2.get("y")+nMoveY);
                 oHole2.set("x", oHole2.get("x"));
-                oHole2.set("scaleX", oHole2.get("scaleX")+0.02);
-                oHole2.set("scaleY", oHole2.get("scaleY")+0.02);
+                oHole2.set("scaleX",  (_nScale>1)?1:_nScale);
+                oHole2.set("scaleY",  (_nScale>1)?1:_nScale);
             }else{
                 oHole2.set("x", 360);
                 oHole2.set("y", 260);
@@ -383,11 +365,12 @@ var resetGame = function(){};
                 oHole2.set("scaleY", 0.3);
             }
 
-            if( oHole3.get("y") < 550 ){
+            if( oHole3.get("y") < 600 ){
+                _nScale = oHole3.get("scaleX")+0.02;
                 oHole3.set("y", oHole3.get("y")+nMoveY);
                 oHole3.set("x", oHole3.get("x")-3);
-                oHole3.set("scaleX", oHole3.get("scaleX")+0.02);
-                oHole3.set("scaleY", oHole3.get("scaleY")+0.02);
+                oHole3.set("scaleX", (_nScale>1)?1:_nScale);
+                oHole3.set("scaleY", (_nScale>1)?1:_nScale);
             }else{
                 oHole3.set("x", 300);
                 oHole3.set("y", 260);
@@ -395,33 +378,58 @@ var resetGame = function(){};
                 oHole3.set("scaleY", 0.3);
             }
 
-            if( oApple.get("y") < 550 ){
-                oApple.set("y", oApple.get("y")+nMoveY);
-                oApple.set("x", oApple.get("x")+nAppleNumber);
-                oApple.set("scaleX", oApple.get("scaleX")+0.001);
-                oApple.set("scaleY", oApple.get("scaleY")+0.001);
+            if( oHole4.get("y") < 700 ){
+                _nScale = oHole4.get("scaleX")+0.02;
+
+                oHole4.set("y", oHole4.get("y")+nMoveY);
+                oHole4.set("x", oHole4.get("x")+4);
+                oHole4.set("scaleX", (_nScale>1)?1:_nScale);
+                oHole4.set("scaleY", (_nScale>1)?1:_nScale);
             }else{
-                oApple.set("x", 150);
-                oApple.set("y", 0);
-                oApple.set("scaleX", 0.1);
-                oApple.set("scaleY", 0.1);
-                oApple.set("visible", true);
-                nAppleNumber = Math.floor(Math.random()*10)-5;
+                oHole4.set("x", 400);
+                oHole4.set("y", 290);
+                oHole4.set("scaleX", 0.3);
+                oHole4.set("scaleY", 0.3);
             }
 
-            if( oChrome.get("y") < 550 ){
-                oChrome.set("y", oChrome.get("y")+nMoveY);
-                oChrome.set("x", oChrome.get("x")+nChromeNumber);
-                oChrome.set("scaleX", oChrome.get("scaleX")+0.005);
-                oChrome.set("scaleY", oChrome.get("scaleY")+0.005);
+            if( oHole5.get("y") < 650 ){
+                _nScale = oHole5.get("scaleX")+0.02;
+                oHole5.set("y", oHole5.get("y")+nMoveY);
+                oHole5.set("x", oHole5.get("x")-4);
+                oHole5.set("scaleX", (_nScale>1)?1:_nScale);
+                oHole5.set("scaleY", (_nScale>1)?1:_nScale);
             }else{
-                oChrome.set("x", 370);
-                oChrome.set("y", 200);
-                oChrome.set("scaleX", 0.3);
-                oChrome.set("scaleY", 0.3);
-                oChrome.set("visible", true);
-                nChromeNumber = Math.floor(Math.random()*10)-5;
+                oHole5.set("x", 330);
+                oHole5.set("y", 280);
+                oHole5.set("scaleX", 0.3);
+                oHole5.set("scaleY", 0.3);
             }
+
+            for( var i = 0, iLen = aRTrees.length;i < iLen; i++){
+                if( aRTrees[i].get("y") < 550){
+                    aRTrees[i].set("y", aRTrees[i].get("y")+5);
+                    aRTrees[i].set("x", aRTrees[i].get("x")+4);
+                    aRTrees[i].set("scaleX", aRTrees[i].get("scaleX")+0.02);
+                    aRTrees[i].set("scaleY", aRTrees[i].get("scaleY")+0.02);
+                }else{
+                    aRTrees[i].set("y", 190);
+                    aRTrees[i].set("x", 550);
+                    aRTrees[i].set("scaleX", 0.5);
+                    aRTrees[i].set("scaleY", 0.5);
+                }
+                if( aLTrees[i].get("y") < 550){
+                    aLTrees[i].set("y", aLTrees[i].get("y")+5);
+                    aLTrees[i].set("x", aLTrees[i].get("x")-5);
+                    aLTrees[i].set("scaleX", aLTrees[i].get("scaleX")+0.02);
+                    aLTrees[i].set("scaleY", aLTrees[i].get("scaleY")+0.02);
+                }else{
+                    aLTrees[i].set("y", 150);
+                    aLTrees[i].set("x", 200);
+                    aLTrees[i].set("scaleX", 0.5);
+                    aLTrees[i].set("scaleY", 0.5);
+                }
+            }
+
 
 
         });
