@@ -2,8 +2,236 @@
 <html>
 <head>
     <title>Chrome Pagoda</title>
-</head>
-<body>
+    <script id="cboxscript" type="text/x-javascript">
+        var cboxgame = {
+            fireEvent : function(data){
+                if( data.btnX == 1 ){
+                    dropChrome();
+                }
+                if( data.btnStart == 1 ){
+                    resetGame();
+                }
+            }
+        };
 
+        var dropChrome = function(){};
+        var resetGame = function(){};
+
+        (function () {
+            var elContainer = document.getElementById("collie_container");
+            var bIsSmall = document.body.clientWidth <= 640;
+            var nRatioSmall = bIsSmall ? 2 : 1;
+            var sFolderName = bIsSmall ? "small" : "large";
+            var sPreviousInput = "";
+            var bReadyPush = false;
+            var bReadyFly = true;
+            var push = null;
+
+            // collie.Renderer.DEBUG_RENDERING_MODE = "dom";
+            collie.Renderer.setPreventDefault(false);
+            collie.Renderer.RETINA_DISPLAY = false;
+
+            collie.ImageManager.add({
+                "ground" : "img/ground.png",
+                "tree1" : "img/tree1.png",
+                "tree2" : "img/tree2.png",
+                "cloud1" : "img/cloud1.png",
+                "cloud2" : "img/cloud2.png",
+                "cloud3" : "img/cloud3.png",
+                "cloud4" : "img/cloud4.png",
+                "mountain" : "img/mountain.png",
+                "chrome" : "img/chrome.png",
+                "angle" : "img/angle.png",
+                "sky" : "img/sky.png",
+                "gameover" : "img/gameover.png"
+            }, function () {
+                if (!bIsSmall) {
+                    var nLayerWidth = 800;
+                    var nLayerHeight = 550;
+                } else {
+                    var nLayerWidth = 320;
+                    var nLayerHeight = 320;
+                }
+
+                var oLayer = new collie.Layer({
+                    width : nLayerWidth,
+                    height : nLayerHeight
+                });
+
+                var oBackground = new collie.DisplayObject({
+                    width : 800,
+                    height : 800,
+                    backgroundImage : "sky",
+                    backgroundRepeat : "repeat-x"
+                }).addTo(oLayer);
+
+                var oCloud2 = new collie.MovableObject({ // 90, 51
+                    x : 330 / nRatioSmall,
+                    y : 20 / nRatioSmall,
+                    velocityX : -50,
+                    opacity : 0.8,
+                    backgroundImage : "cloud2",
+                    positionRepeat : true,
+                    rangeX : [-90, nLayerWidth]
+                }).addTo(oLayer);
+                var oCloud3 = new collie.MovableObject({ // 135, 76
+                    x : 550 / nRatioSmall,
+                    y : 200 / nRatioSmall,
+                    velocityX : -80,
+                    backgroundImage : "cloud3",
+                    positionRepeat : true,
+                    rangeX : [-135, nLayerWidth]
+                }).addTo(oLayer);
+                var oCloud4 = new collie.MovableObject({ // 128, 76
+                    x : 600 / nRatioSmall,
+                    y : 80 / nRatioSmall,
+                    opacity : 0.6,
+                    velocityX : -50,
+                    backgroundImage : "cloud4",
+                    positionRepeat : true,
+                    rangeX : [-128, nLayerWidth]
+                }).addTo(oLayer);
+                var oCloud1 = new collie.MovableObject({ // 168, 100
+                    x : 75 / nRatioSmall,
+                    y : 120 / nRatioSmall,
+                    opacity : 1,
+                    velocityX : -120,
+                    backgroundImage : "cloud1",
+                    positionRepeat : true,
+                    rangeX : [-168, nLayerWidth]
+                }).addTo(oLayer);
+
+                var oMountain = new collie.DisplayObject({
+                    x : 0,
+                    backgroundImage : "mountain"
+                }).addTo(oLayer).bottom(35 * nRatioSmall);
+
+                var oGround = new collie.DisplayObject({
+                    width : 800,
+                    height : 88,
+                    backgroundImage : "ground",
+                    backgroundRepeat : "repeat-x"
+                }).addTo(oLayer).bottom(0);
+
+                var oTree1 = new collie.DisplayObject({
+                    backgroundImage : "tree1"
+                }).addTo(oLayer).right(90 / nRatioSmall).bottom(55);
+
+                var oTree2 = new collie.DisplayObject({
+                    x : 100 / nRatioSmall,
+                    backgroundImage : "tree2"
+                }).addTo(oLayer).bottom(55);
+
+                var oAngle = new collie.DisplayObject({
+                    x : 400,
+                    y : 100,
+                    backgroundImage : "angle"
+                }).addTo(oLayer);
+
+                var oChrome = new collie.DisplayObject({
+                    x : 400,
+                    y : 135,
+                    scaleX : 0.6,
+                    scaleY : 0.6,
+                    backgroundImage : "chrome"
+                }).addTo(oLayer);
+
+                var oGameOver = new collie.DisplayObject({
+                    x : 200,
+                    y : 150,
+                    visible: false,
+                    backgroundImage : "gameover"
+                }).addTo(oLayer);
+
+
+                var aChromes = [];
+                var iChromesIndex = 0;
+
+                var _bChromeDrop = false;
+                dropChrome = function(){
+                    if( _bChromeDrop == false ){
+                        _bChromeDrop = true;
+                        var nChromeX = oChrome.get("x");
+                        aChromes[iChromesIndex] = new collie.DisplayObject({
+                            x : nChromeX,
+                            y : 135,
+                            scaleX : 0.6,
+                            scaleY : 0.6,
+                            backgroundImage : "chrome"
+                        }).addTo(oLayer);
+                        iChromesIndex++;
+                    }
+                }
+
+                resetGame = function(){
+                    console.log(1);
+                    document.location.reload();
+                }
+
+                collie.Renderer.addLayer(oLayer);
+                collie.Renderer.load(elContainer);
+                var nDirection = 0;
+                var bSafe = true;
+                collie.Renderer.start(1000 / 30,function(){
+
+                    if( _bChromeDrop == false ){
+                        var angelX = oAngle.get("x");
+                        if( angelX < 250 ){
+                            nDirection = 1;
+                        }else if( angelX > 500 ){
+                            nDirection = 0;
+                        }else{
+                        }
+                        if( nDirection == 0 ){
+                            oAngle.set("x",angelX-10);
+                            oChrome.set("x",angelX-10);
+                        }else{
+                            oAngle.set("x",angelX+10);
+                            oChrome.set("x",angelX+10);
+                        }
+                    }else{
+                        var nChromeX = aChromes[iChromesIndex-1].get("x");
+                        var nChromeY = aChromes[iChromesIndex-1].get("y");
+                        if( iChromesIndex > 1 ){
+                            oldChromeX = aChromes[iChromesIndex-2].get("x");
+                            if( Math.abs(nChromeX - oldChromeX) > 35 ){
+                                chromeTop = 450;
+                                bSafe = false;
+                            }else{
+                                chromeTop = aChromes[iChromesIndex-2].get("y")-55;
+                            }
+                        }else{
+                            chromeTop = 450;
+                        }
+                        if( nChromeY <= chromeTop ){
+                            aChromes[iChromesIndex-1].set("y", nChromeY+10);
+                        }else{
+                            if( bSafe ){
+                                _bChromeDrop = false;
+                                if( nChromeY < 350 ){
+                                    oGround.set("y",oGround.get("y")+50);
+                                    oMountain.set("y",oMountain.get("y")+50);
+                                    oTree1.set("y",oTree1.get("y")+50);
+                                    oTree2.set("y",oTree2.get("y")+50);
+                                    for( var i = 0,iLen = aChromes.length; i < iLen; i++){
+                                        aChromes[i].set("y", aChromes[i].get("y")+50);
+                                    }
+                                }
+                            }else{
+                                oGameOver.set("visible",true);
+                            }
+                        }
+                    }
+                });
+            });
+        })();
+
+    </script>
+</head>
+<body style="width:100%;height:100%;background-color:#ffffff">
+<div style="margin:100px 0 0 400px">
+    <div id="collie_container" >
+    </div>
+</div>
 </body>
 </html>

@@ -1,126 +1,439 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Android Adventure</title>
-    <script id="cboxscript" type="text/x-javascript">
-        var cboxgame = {
-            fireEvent : function(data){
-                if( data.btnX == 1 ){
-                    testCall();
-                }
-            }
-        };
-        var testCall = function(){
+<title>Chrome Pagoda</title>
+<script id="cboxscript" type="text/x-javascript">
+var _oldData = {
+    pX1 : 0,
+    pY1 : 0,
+    pX2 : 0,
+    pY2 : 0,
+    pX3 : 0,
+    pY3 : 0,
+    btnA : 0,
+    btnB : 0,
+    btnY : 0,
+    btnX : 0,
+    btnLB : 0,
+    btnRB : 0,
+    btnLT : 0,
+    btnRT : 0,
+    btnBack : 0,
+    btnStart : 0,
+    accX : 0,
+    accY : 0,
+    accZ : 0
+};
+var cboxgame = {
+    fireEvent : function(data){
 
-        };
-        collie.ImageManager.addImages({
-            "bird_walk" : "./img/bird_walk.png",
-            "bird_jump" : "./img/bird_jump.png",
-            "ground" : "./img/ground.png"
-        }, function () {
-            var layer = new collie.Layer({
-                width : 300,
-                height : 300
-            }).attach({
-                        click : function () {
-                            if (oTimerJump === null) {
-                                oTimer.stop();
-                                oAvatarWalk.set("visible", false);
-                                oAvatarJump.set("visible", true);
-                                oTimerJump = collie.Timer.cycle(oAvatarJump, "17fps", {
-                                    from : 0,
-                                    to : 16,
-                                    loop : 1,
-                                    onComplete : function () {
-                                        oTimer = collie.Timer.cycle(oAvatarWalk, "20fps", {
-                                            from : 0,
-                                            to : 9,
-                                            loop : 0
-                                        });
-                                        oTimerJump = null;
-                                        oAvatarWalk.set("visible", true);
-                                        oAvatarJump.set("visible", false);
-                                    }
-                                });
-                            }
-                        }
-                    });
+        if( data.pX3 > _oldData.pX3 || data.pX1 > _oldData.pX1 ){
+            doMove(0);
+        }else if( data.pX3 < _oldData.pX3 || data.pX1 < _oldData.pX1 ){
+            doMove(1);
+        }
 
-            var oTimerJump = null;
+        _oldData.pX1 = data.pX1;
+        _oldData.pX2 = data.pX2;
+        _oldData.pX3 = data.pX3;
+        _oldData.pY1 = data.pY1;
+        _oldData.pY2 = data.pY2;
+        _oldData.pY3 = data.pY3;
 
-            testCall = function(){
-                if (oTimerJump === null) {
-                    oTimer.stop();
-                    oAvatarWalk.set("visible", false);
-                    oAvatarJump.set("visible", true);
-                    oTimerJump = collie.Timer.cycle(oAvatarJump, "17fps", {
-                        from : 0,
-                        to : 16,
-                        loop : 1,
-                        onComplete : function () {
-                            oTimer = collie.Timer.cycle(oAvatarWalk, "20fps", {
-                                from : 0,
-                                to : 9,
-                                loop : 0
-                            });
-                            oTimerJump = null;
-                            oAvatarWalk.set("visible", true);
-                            oAvatarJump.set("visible", false);
-                        }
-                    });
-                }
-            }
+        if( data.btnX == 1 ){
+            jumpP();
+        }
+        if( data.btnStart == 1 ){
+            resetGame();
+        }
+    }
+};
 
-            var oGround = new collie.MovableObject({
-                x : 0,
-                y : 300 - 88,
-                width : 320 * 2, // 연속적으로 이어질 수 있도록 화면 밖으로 벗어나도록 그림
-                height : 88,
-                velocityX : -80, // 속도
-                backgroundRepeat : "repeat-x", // 배경을 반복해서 그림
-                rangeX : [-320, 0], // x좌표의 범위를 지정
-                positionRepeat : true, // 범위를 벗어나면 다시 반대쪽으로 돌아오도록 설정
-                backgroundImage : "ground"
-            }).addTo(layer);
+var jumpP = function(){};
+var doMove = function(nDirection){};
+var resetGame = function(){};
 
-            var oAvatarContainer = new collie.DisplayObject({
-                x : 50,
-                y : 80,
-                width : 70,
-                height : 150
-            }).addTo(layer);
+(function () {
+    var elContainer = document.getElementById("collie_container");
+    var bIsSmall = document.body.clientWidth <= 640;
+    var nRatioSmall = bIsSmall ? 2 : 1;
+    var sFolderName = bIsSmall ? "small" : "large";
+    var sPreviousInput = "";
+    var bReadyPush = false;
+    var bReadyFly = true;
+    var push = null;
 
-            var oAvatarWalk = new collie.DisplayObject({
-                x : 0,
-                y : 0,
-                width : 70,
-                height : 150,
-                backgroundImage : "bird_walk"
-            }).addTo(oAvatarContainer);
+    collie.Renderer.setPreventDefault(false);
+    collie.Renderer.RETINA_DISPLAY = false;
 
-            var oAvatarJump = new collie.DisplayObject({
-                width : 70,
-                height : 150,
-                spriteLength : 17,
-                backgroundImage : "bird_jump",
-                visible : false
-            }).addTo(oAvatarContainer);
+    collie.ImageManager.add({
+        "ground" : "img/ground.png",
+        "tree1" : "img/tree1.png",
+        "tree2" : "img/tree2.png",
+        "cloud1" : "img/cloud1.png",
+        "cloud2" : "img/cloud2.png",
+        "cloud3" : "img/cloud3.png",
+        "cloud4" : "img/cloud4.png",
+        "mountain" : "img/mountain.png",
+        "chrome" : "img/chrome.png",
+        "sky" : "img/sky.png",
+        "gameover" : "img/gameover.png",
+        "apple" : "img/apple.png",
+        "hole" : "img/Hole.gif",
+        "p1" : "img/p1.png",
+        "p2" : "img/p2.png"
+    }, function () {
+        if (!bIsSmall) {
+            var nLayerWidth = 800;
+            var nLayerHeight = 550;
+        } else {
+            var nLayerWidth = 320;
+            var nLayerHeight = 320;
+        }
 
-            var oTimer = collie.Timer.cycle(oAvatarWalk, "20fps", {
-                from : 0,
-                to : 9,
-                loop : 0
-            });
+        var oLayer = new collie.Layer({
+            width : nLayerWidth,
+            height : nLayerHeight
+        });
 
-            collie.Renderer.addLayer(layer);
-            collie.Renderer.load(document.getElementById("container"));
-            collie.Renderer.start(1000 / 30);
+        var oBackground = new collie.DisplayObject({
+            width : 800,
+            height : 800,
+            backgroundImage : "sky",
+            backgroundRepeat : "repeat-x"
+        }).addTo(oLayer);
+
+        var oCloud2 = new collie.MovableObject({ // 90, 51
+            x : 330 / nRatioSmall,
+            y : 20 / nRatioSmall,
+            velocityX : -50,
+            opacity : 0.8,
+            backgroundImage : "cloud2",
+            positionRepeat : true,
+            rangeX : [-90, nLayerWidth]
+        }).addTo(oLayer);
+        var oCloud3 = new collie.MovableObject({ // 135, 76
+            x : 550 / nRatioSmall,
+            y : 200 / nRatioSmall,
+            velocityX : -80,
+            backgroundImage : "cloud3",
+            positionRepeat : true,
+            rangeX : [-135, nLayerWidth]
+        }).addTo(oLayer);
+        var oCloud4 = new collie.MovableObject({ // 128, 76
+            x : 600 / nRatioSmall,
+            y : 80 / nRatioSmall,
+            opacity : 0.6,
+            velocityX : -50,
+            backgroundImage : "cloud4",
+            positionRepeat : true,
+            rangeX : [-128, nLayerWidth]
+        }).addTo(oLayer);
+        var oCloud1 = new collie.MovableObject({ // 168, 100
+            x : 75 / nRatioSmall,
+            y : 120 / nRatioSmall,
+            opacity : 1,
+            velocityX : -120,
+            backgroundImage : "cloud1",
+            positionRepeat : true,
+            rangeX : [-168, nLayerWidth]
+        }).addTo(oLayer);
+
+        var oMountain = new collie.DisplayObject({
+            x : 0,
+            backgroundImage : "mountain"
+        }).addTo(oLayer).bottom(240 * nRatioSmall);
+
+        var oGround = new collie.DisplayObject({
+            width : 800,
+            height : 300,
+            backgroundImage : "ground",
+            backgroundRepeat : "repeat-x"
+        }).addTo(oLayer).bottom(0);
+
+        var aRTrees = [];
+        var nBottom = 250;
+        var nRight = 200;
+        var nScale = 0.5;
+        for( var i = 0; i < 20; i++ ){
+            aRTrees[i] = new collie.DisplayObject({
+                scaleX : nScale,
+                scaleY : nScale,
+                backgroundImage : (i%2)?"tree1":"tree2"
+            }).addTo(oLayer).right(nRight).bottom(nBottom);
+            nBottom -= 20;
+            nRight -= 30;
+            nScale += 0.1;
+        }
+
+        var aLTrees = [];
+        var nBottom = 250;
+        var nLeft = 200;
+        var nScale = 0.5;
+        for( var i = 0; i < 20; i++ ){
+            aLTrees[i] = new collie.DisplayObject({
+                x : nLeft,
+                scaleX : nScale,
+                scaleY : nScale,
+                backgroundImage : (i%2)?"tree1":"tree2"
+            }).addTo(oLayer).bottom(nBottom);
+            nBottom -= 20;
+            nLeft -= 30;
+            nScale += 0.1;
+        }
+
+
+        var oChrome = new collie.DisplayObject({
+            x : 370,
+            y : 200,
+            scaleX : 0.3,
+            scaleY : 0.3,
+            backgroundImage : "chrome"
+        }).addTo(oLayer);
+
+        var oApple = new collie.DisplayObject({
+            x : 150,
+            y : 0,
+            scaleX : 0.1,
+            scaleY : 0.1,
+            backgroundImage : "apple"
+        }).addTo(oLayer);
+
+        var oHole1 = new collie.DisplayObject({
+            x : 400,
+            y : 260,
+            scaleX : 0.3,
+            scaleY : 0.3,
+            backgroundImage : "hole"
+        }).addTo(oLayer);
+        var oHole2 = new collie.DisplayObject({
+            x : 360,
+            y : 400,
+            scaleX : 0.3,
+            scaleY : 0.3,
+            backgroundImage : "hole"
+        }).addTo(oLayer);
+        var oHole3 = new collie.DisplayObject({
+            x : 300,
+            y : 300,
+            scaleX : 0.3,
+            scaleY : 0.3,
+            backgroundImage : "hole"
+        }).addTo(oLayer);
+
+        var oP1 = new collie.DisplayObject({
+            x : 400,
+            y : 450,
+            scaleX : 0.8,
+            scaleY : 0.8,
+            width : 87,
+            height : 87,
+            backgroundImage : "p1"
+        }).addTo(oLayer);
+
+        var oP2 = new collie.DisplayObject({
+            x : 400,
+            y : 450,
+            scaleX : 0.8,
+            scaleY : 0.8,
+            width : 87,
+            height : 87,
+            backgroundImage : "p2",
+            visible : false
+        }).addTo(oLayer);
+
+
+        var oTimer = collie.Timer.cycle(oP1, "20fps", {
+            from : 0,
+            to : 4,
+            loop : 0
         });
 
 
-    </script>
+        var oGameOver = new collie.DisplayObject({
+            x : 200,
+            y : 150,
+            visible: false,
+            backgroundImage : "gameover"
+        }).addTo(oLayer);
+
+        var oTimerJump = null;
+        jumpP = function(){
+            if (oTimerJump === null) {
+                oTimer.stop();
+                oP1.set("visible", false);
+                oP2.set("visible", true);
+                oP2.set("y",oP2.get("y")-20);
+                oTimerJump = collie.Timer.cycle(oP2, "17fps", {
+                    from : 0,
+                    to : 4,
+                    loop : 1,
+                    onComplete : function () {
+                        oTimer = collie.Timer.cycle(oP1, "20fps", {
+                            from : 0,
+                            to : 4,
+                            loop : 0
+                        });
+                        oTimerJump = null;
+                        oP1.set("visible", true);
+                        oP2.set("visible", false);
+                        oP2.set("y",450);
+                    }
+                });
+            }
+        };
+        doMove = function(nDirection){
+            if(nDirection == 0 ){
+                oP1.set("x", oP1.get("x")+10);
+                oP2.set("x", oP1.get("x")+10);
+            }else if( nDirection == 1){
+                oP1.set("x", oP1.get("x")-10);
+                oP2.set("x", oP1.get("x")-10);
+            }
+        };
+
+
+        resetGame = function(){
+            document.location.reload();
+        }
+
+        collie.Renderer.addLayer(oLayer);
+        collie.Renderer.load(elContainer);
+        var nDirection = 0;
+        var bSafe = true;
+        var nMoveY = 5;
+        nAppleNumber = 5;
+        nChromeNumber = -3;
+        collie.Renderer.start(1000 / 30,function(){
+
+            if (oTimerJump === null){
+                nPx = oP1.get("x");
+                nPy = oP1.get("y");
+                if(nPy - oHole1.get("y") < -50){
+                    if( oHole1.get("x") < nPx && nPx < oHole1.get("x") + 100 ){
+                        console.log("1", oHole1.get("x"), nPx);
+                        if( !bSafe ){
+                            setTimeout(function(){
+                                bSafe = true;
+                            },1000);
+                        }else{
+                            bSafe = false;
+                        }
+                    }
+                }
+                if(nPy - oHole2.get("y") < -50){
+                    if( oHole2.get("x") < nPx && nPx < oHole2.get("x") + 100 ){
+                        console.log("2", oHole2.get("x"), nPx);
+                        if( !bSafe ){
+                            setTimeout(function(){
+                                bSafe = true;
+                            },1000);
+                        }else{
+                            bSafe = false;
+                        }
+                    }
+                }
+                if(nPy - oHole3.get("y") < -50){
+                    if( oHole3.get("x") < nPx && nPx < oHole3.get("x") + 100 ){
+                        console.log("3", oHole3.get("x"), nPx);
+                        if( !bSafe ){
+                            setTimeout(function(){
+                                bSafe = true;
+                            },1000);
+                        }else{
+                            bSafe = false;
+                        }
+
+                    }
+                }
+//                if(nPy - oApple.get("y") < -50){
+//                    oApple.set("visible", false);
+//                    setTimeout(function(){
+//                        bSafe = true;
+//                    },500);
+//                    bSafe = false;
+//                }
+//                if(nPy - oChrome.get("y") < -50){
+//                    oChrome.set("visible", false);
+//                }
+            }
+
+            if( !bSafe ) return;
+            if( oHole1.get("y") < 550 ){
+                oHole1.set("y", oHole1.get("y")+nMoveY);
+                oHole1.set("x", oHole1.get("x")+2);
+                oHole1.set("scaleX", oHole1.get("scaleX")+0.03);
+                oHole1.set("scaleY", oHole1.get("scaleY")+0.03);
+            }else{
+                oHole1.set("x", 400);
+                oHole1.set("y", 260);
+                oHole1.set("scaleX", 0.3);
+                oHole1.set("scaleY", 0.3);
+            }
+
+            if( oHole2.get("y") < 550 ){
+                oHole2.set("y", oHole2.get("y")+nMoveY);
+                oHole2.set("x", oHole2.get("x"));
+                oHole2.set("scaleX", oHole2.get("scaleX")+0.02);
+                oHole2.set("scaleY", oHole2.get("scaleY")+0.02);
+            }else{
+                oHole2.set("x", 360);
+                oHole2.set("y", 260);
+                oHole2.set("scaleX", 0.3);
+                oHole2.set("scaleY", 0.3);
+            }
+
+            if( oHole3.get("y") < 550 ){
+                oHole3.set("y", oHole3.get("y")+nMoveY);
+                oHole3.set("x", oHole3.get("x")-3);
+                oHole3.set("scaleX", oHole3.get("scaleX")+0.02);
+                oHole3.set("scaleY", oHole3.get("scaleY")+0.02);
+            }else{
+                oHole3.set("x", 300);
+                oHole3.set("y", 260);
+                oHole3.set("scaleX", 0.3);
+                oHole3.set("scaleY", 0.3);
+            }
+
+            if( oApple.get("y") < 550 ){
+                oApple.set("y", oApple.get("y")+nMoveY);
+                oApple.set("x", oApple.get("x")+nAppleNumber);
+                oApple.set("scaleX", oApple.get("scaleX")+0.001);
+                oApple.set("scaleY", oApple.get("scaleY")+0.001);
+            }else{
+                oApple.set("x", 150);
+                oApple.set("y", 0);
+                oApple.set("scaleX", 0.1);
+                oApple.set("scaleY", 0.1);
+                oApple.set("visible", true);
+                nAppleNumber = Math.floor(Math.random()*10)-5;
+            }
+
+            if( oChrome.get("y") < 550 ){
+                oChrome.set("y", oChrome.get("y")+nMoveY);
+                oChrome.set("x", oChrome.get("x")+nChromeNumber);
+                oChrome.set("scaleX", oChrome.get("scaleX")+0.005);
+                oChrome.set("scaleY", oChrome.get("scaleY")+0.005);
+            }else{
+                oChrome.set("x", 370);
+                oChrome.set("y", 200);
+                oChrome.set("scaleX", 0.3);
+                oChrome.set("scaleY", 0.3);
+                oChrome.set("visible", true);
+                nChromeNumber = Math.floor(Math.random()*10)-5;
+            }
+
+
+        });
+    });
+})();
+
+</script>
 </head>
-<body style="width:100%;height:100%;background-color:black">
-<div id="container" class="container"></div>
+<body style="width:100%;height:100%;background-color:#ffffff">
+<div style="margin:100px 0 0 400px">
+    <div id="collie_container" >
+    </div>
+</div>
 </body>
 </html>

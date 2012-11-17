@@ -3,13 +3,72 @@
 <head>
     <title>Xbox Contorller</title>
     <script id="cboxscript" type="text/x-javascript">
+        var _oldData = {
+            pX1 : 0,
+            pY1 : 0,
+            pX2 : 0,
+            pY2 : 0,
+            pX3 : 0,
+            pY3 : 0,
+            btnA : 0,
+            btnB : 0,
+            btnY : 0,
+            btnX : 0,
+            btnLB : 0,
+            btnRB : 0,
+            btnLT : 0,
+            btnRT : 0,
+            btnBack : 0,
+            btnStart : 0,
+            accX : 0,
+            accY : 0,
+            accZ : 0
+        };
         var cboxgame = {
             fireEvent : function(data){
-                if( data.btnX == 1 ){
-                    testCall();
+                if( data.pX3 != _oldData.pX3 || data.pY3 != _oldData.pY3){
+                    showJoy1(true);
+                }else{
+                    showJoy1(false);
                 }
+
+                if( data.pX2 != _oldData.pX2 || data.pY2 != _oldData.pY2){
+                    showJoy2(true);
+                }else{
+                    showJoy2(false);
+                }
+
+                if( data.pX1 != _oldData.pX1 || data.pY1 != _oldData.pY1){
+                    btnArrow(true);
+                }else{
+                    btnArrow(false);
+                }
+                _oldData.pX1 = data.pX1;
+                _oldData.pX2 = data.pX2;
+                _oldData.pX3 = data.pX3;
+                _oldData.pY1 = data.pY1;
+                _oldData.pY2 = data.pY2;
+                _oldData.pY3 = data.pY3;
+
+                if( data.btnBack == 1 ){
+                    viewBtnBack(true);
+                }else{
+                    viewBtnBack(false);
+                }
+                if( data.btnStart == 1 ){
+                    viewBtnStart(true);
+                }else{
+                    viewBtnStart(false);
+                }
+
             }
         };
+
+        var showJoy1 = function(bView){};
+        var showJoy2 = function(bView){};
+        var btnArrow = function(bView){};
+        var viewBtnBack = function(bView){};
+        var viewBtnStart = function(bView){};
 
         function createNaClModule(tool, width, height) {
             var moduleEl = document.createElement('embed');
@@ -38,7 +97,8 @@
 
 
         collie.ImageManager.addImages({
-            "xbox" : "./img/xbox.png"
+            "xbox" : "./img/xbox.png",
+            "arrow" : "./img/Down_Arrow_Icon.png"
         }, function () {
             var layer = new collie.Layer({
                 width : 1024,
@@ -52,6 +112,42 @@
                 height : 360,
                 backgroundImage : "xbox"
             }).addTo(layer);
+
+            var makeArrow = function(x,y,angle){
+                return new collie.DisplayObject({
+                    x : x,
+                    y : y,
+                    angle : angle,
+                    scaleX : 0.1,
+                    scaleY : 0.1,
+                    width : 500,
+                    height : 500,
+                    visible : false,
+                    backgroundImage : "arrow"
+                }).addTo(layer);
+            }
+
+            var oJoy1 = makeArrow(300,-30,300);
+            showJoy1 = function(bView){
+                oJoy1.set("visible", bView);
+            }
+            var oJoy2 = makeArrow(650,120,120);
+            showJoy2 = function(bView){
+                oJoy2.set("visible", bView);
+            }
+            var oBtnArrow = makeArrow(400,150,220);
+            btnArrow = function(bView){
+                oBtnArrow.set("visible", bView);
+            }
+
+            var oBtnEnd = makeArrow(450,150,0);
+            var viewBtnBack = function(bView){
+                oBtnEnd.set("visible", true);
+            }
+            var oBtnStart = makeArrow(550,150,0);
+            var viewBtnStart = function(bView){
+                oBtnStart.set("visible", true);
+            }
 
 
             collie.Renderer.addLayer(layer);
